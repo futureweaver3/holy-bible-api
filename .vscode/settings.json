@@ -1,5 +1,11 @@
 {
   "cSpell.words": ["jsonify"],
   "editor.tabSize": 2,
-  "editor.insertSpaces": true
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8",
+    "editor.formatOnSave": true
+  },
+  "autopep8.args": ["--indent-size=2", "--ignore=E121"]
 }
