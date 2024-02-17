@@ -1,8 +1,82 @@
-DEFAULT_TRANSLATION = "kjv"
+DEFAULT_TRANSLATION = "asv"
 
 AVAILABLE_TRANSLATIONS = ["asv", "kjv"]
 
 TRANSLATIONS_PATHS = {
     "asv": "bibles/asv.sqlite",
     "kjv": "bibles/kjv.sqlite"
+}
+
+TRANSLATIONS_NAMES = {
+    "asv": "American Standard Version (1901)",
+    "kjv": "King James Version"
+}
+
+BIBLE_BOOKS = {
+  "genesis": {"abbreviation": "gen", "number": 1},
+  "exodus": {"abbreviation": "ex", "number": 2},
+  "leviticus": {"abbreviation": "lev", "number": 3},
+  "numbers": {"abbreviation": "num", "number": 4},
+  "deuteronomy": {"abbreviation": "deut", "number": 5},
+  "joshua": {"abbreviation": "josh", "number": 6},
+  "judges": {"abbreviation": "judg", "number": 7},
+  "ruth": {"abbreviation": "ruth", "number": 8},
+  "1samuel": {"abbreviation": "1sam", "number": 9},
+  "2samuel": {"abbreviation": "2sam", "number": 10},
+  "1kings": {"abbreviation": "1kgs", "number": 11},
+  "2kings": {"abbreviation": "2kgs", "number": 12},
+  "1chronicles": {"abbreviation": "1chron", "number": 13},
+  "2chronicles": {"abbreviation": "2chron", "number": 14},
+  "ezra": {"abbreviation": "ezra", "number": 15},
+  "nehemiah": {"abbreviation": "neh", "number": 16},
+  "esther": {"abbreviation": "est", "number": 17},
+  "job": {"abbreviation": "job", "number": 18},
+  "psalms": {"abbreviation": "ps", "number": 19},
+  "proverbs": {"abbreviation": "prov", "number": 20},
+  "ecclesiastes": {"abbreviation": "eccles", "number": 21},
+  "songofsolomon": {"abbreviation": "song", "number": 22},
+  "isaiah": {"abbreviation": "isa", "number": 23},
+  "jeremiah": {"abbreviation": "jer", "number": 24},
+  "lamentations": {"abbreviation": "lam", "number": 25},
+  "ezekiel": {"abbreviation": "ezek", "number": 26},
+  "daniel": {"abbreviation": "dan", "number": 27},
+  "hosea": {"abbreviation": "hos", "number": 28},
+  "joel": {"abbreviation": "joel", "number": 29},
+  "amos": {"abbreviation": "amos", "number": 30},
+  "obadiah": {"abbreviation": "obad", "number": 31},
+  "jonah": {"abbreviation": "jonah", "number": 32},
+  "micah": {"abbreviation": "mic", "number": 33},
+  "nahum": {"abbreviation": "nah", "number": 34},
+  "habakkuk": {"abbreviation": "hab", "number": 35},
+  "zephaniah": {"abbreviation": "zeph", "number": 36},
+  "haggai": {"abbreviation": "hag", "number": 37},
+  "zechariah": {"abbreviation": "zech", "number": 38},
+  "malachi": {"abbreviation": "mal", "number": 39},
+  "matthew": {"abbreviation": "matt", "number": 40},
+  "mark": {"abbreviation": "mark", "number": 41},
+  "luke": {"abbreviation": "luke", "number": 42},
+  "john": {"abbreviation": "jn", "number": 43},
+  "acts": {"abbreviation": "acts", "number": 44},
+  "romans": {"abbreviation": "rom", "number": 45},
+  "1corinthians": {"abbreviation": "1cor", "number": 46},
+  "2corinthians": {"abbreviation": "2cor", "number": 47},
+  "galatians": {"abbreviation": "gal", "number": 48},
+  "ephesians": {"abbreviation": "eph", "number": 49},
+  "philippians": {"abbreviation": "phil", "number": 50},
+  "colossians": {"abbreviation": "col", "number": 51},
+  "1thessalonians": {"abbreviation": "1thess", "number": 52},
+  "2thessalonians": {"abbreviation": "2thess", "number": 53},
+  "1timothy": {"abbreviation": "1tim", "number": 54},
+  "2timothy": {"abbreviation": "2tim", "number": 55},
+  "titus": {"abbreviation": "titus", "number": 56},
+  "philemon": {"abbreviation": "philem", "number": 57},
+  "hebrews": {"abbreviation": "heb", "number": 58},
+  "james": {"abbreviation": "jas", "number": 59},
+  "1peter": {"abbreviation": "1pet", "number": 60},
+  "2peter": {"abbreviation": "2pet", "number": 61},
+  "1john": {"abbreviation": "1jn", "number": 62},
+  "2john": {"abbreviation": "2jn", "number": 63},
+  "3john": {"abbreviation": "3jn", "number": 64},
+  "jude": {"abbreviation": "jude", "number": 65},
+  "revelation": {"abbreviation": "rev", "number": 66},
 }
