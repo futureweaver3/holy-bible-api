@@ -1,33 +1,25 @@
-import sqlite3
+import asyncio
+import aiosqlite
 import unicodedata
 from constants import *
 
 
-def execute_query(db_path, sql_query):
-  # Function to execute an SQL command and fetch all records, returning them as a list of dictionaries
-  conn = sqlite3.connect(db_path)
-  cursor = conn.cursor()
-  cursor.execute(sql_query)
-  rows = cursor.fetchall()
-  field_names = [description[0]
-                 for description in cursor.description]  # Get field names
-  conn.close()
-  # Convert records to a list of dictionaries
-  records_list = []
-  for row in rows:
-    record_dict = {field_names[i]: row[i] for i in range(len(field_names))}
-    records_list.append(record_dict)
-  return records_list
+async def execute_query(db_path, sql_query):
+  # Create an asynchronous function to execute the SQL query
+  async with aiosqlite.connect(db_path) as db:
+    async with db.execute(sql_query) as cursor:
+      # Fetch the field names
+      fields = [description[0] for description in cursor.description]
+      # Fetch the rows
+      rows = await cursor.fetchall()
+      return fields, rows
 
 
 def get_meta(db_path):
   # Function to execute an SQL command and fetch all records, returning them as a list of dictionaries
-  conn = sqlite3.connect(db_path)
-  cursor = conn.cursor()
   sql_query = 'SELECT * FROM meta'
-  cursor.execute(sql_query)
-  rows = cursor.fetchall()
-  conn.close()
+  # Execute the SQL query asynchronously
+  rows = asyncio.run(execute_query(db_path, sql_query))[1]
   # Convert records to a dictionary
   records_list = {}
   for row in rows:
@@ -45,14 +37,9 @@ def get_book_number(book_abbreviation):
 
 def fetch_verse_from_database(translation, book_number, chapter, verse):
   db_path = TRANSLATIONS_PATHS[translation]
-  conn = sqlite3.connect(db_path)
-  cursor = conn.cursor()
   sql_query = f'SELECT * FROM verses WHERE book = {book_number} AND chapter = {chapter} AND verse = {verse}'
-  cursor.execute(sql_query)
-  rows = cursor.fetchall()
-  field_names = [description[0]
-                 for description in cursor.description]  # Get field names
-  conn.close()
+  # Execute the SQL query asynchronously
+  field_names, rows = asyncio.run(execute_query(db_path, sql_query))
   # Convert records to a list of dictionaries
   records_list = []
   for row in rows:
