@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify
 
 from constants import *
@@ -6,13 +7,19 @@ from utils import *
 app = Flask(__name__)
 
 
+def is_render():
+  # Define the is_render function to check the environment variables
+  return os.environ.get('RENDER') == 'true'
+
+
 @app.route('/info')
 def get_info():
   info_data = {
       "name": "Holy Bible API",
       "version": "1.0.0",
       "author": "Joseph Awad <futureweaver3@gmail.com>",
-      "translations": TRANSLATIONS_NAMES
+      "translations": TRANSLATIONS_NAMES,
+      "production": is_render()
   }
   return jsonify(info_data)
 
