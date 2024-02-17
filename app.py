@@ -59,5 +59,7 @@ def get_verse(book_abbreviation, chapter, verse, translation=DEFAULT_TRANSLATION
   return jsonify(requested_verse)
 
 
-# if __name__ == '__main__':
-#  app.run(debug=True)
+if __name__ == '__main__':
+  # Check if the app is running on render.com or not
+  if not is_render():
+    app.run(debug=True)  # Start Flask development server for local debugging
