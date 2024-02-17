@@ -38,13 +38,13 @@ def get_books():
 @app.route('/verse/<book_abbreviation><chapter>:<verse>')
 @app.route('/verse/<book_abbreviation><chapter>:<verse>/<translation>')
 def get_verse(book_abbreviation, chapter, verse, translation=DEFAULT_TRANSLATION):
-  book_number = get_book_number(book_abbreviation)
-  if book_number is None:
+  book_record = get_book_record(book_abbreviation)
+  if book_record is None:
     return jsonify({'error': 'Invalid book abbreviation'}), 400
 
   # Fetch the verse from the SQLite database using the book number, chapter number, and verse number
   requested_verse = fetch_verse_from_database(
-    translation, book_number, chapter, verse)
+    translation, book_record, chapter, verse)
 
   if len(requested_verse) < 1:
     return jsonify({'error': 'Verse not found'}), 404

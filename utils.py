@@ -35,8 +35,20 @@ def get_book_number(book_abbreviation):
   return None
 
 
-def fetch_verse_from_database(translation, book_number, chapter, verse):
+def get_book_record(book_abbreviation):
+  book_requested = book_abbreviation.lower()
+  for book_name, book in BIBLE_BOOKS.items():
+    if book['abbreviation'] == book_requested or book_name == book_requested:
+      book_record = {book_name: book}
+      return book_record
+  return None
+
+
+def fetch_verse_from_database(translation, book_record, chapter, verse):
   db_path = TRANSLATIONS_PATHS[translation]
+  book_key = next(iter(book_record.keys()))
+  book_value = next(iter(book_record.values()))
+  book_number = book_value['number']
   sql_query = f'SELECT * FROM verses WHERE book = {book_number} AND chapter = {chapter} AND verse = {verse}'
   # Execute the SQL query asynchronously
   field_names, rows = asyncio.run(execute_query(db_path, sql_query))
@@ -46,6 +58,8 @@ def fetch_verse_from_database(translation, book_number, chapter, verse):
     record_dict = {field_names[i]: clean_unicode(
       row[i]) if field_names[i] == "text" else row[i] for i in range(len(field_names))}
     record_dict['translation'] = translation
+    record_dict['book_name'] = book_key
+    record_dict['book_abbreviation'] = book_value['abbreviation']
     records_list.append(record_dict)
   return records_list
 
