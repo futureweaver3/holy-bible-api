@@ -131,7 +131,10 @@ def get_chapter_info_route(book_abbreviation, chapter, translation=DEFAULT_TRANS
 @app.route('/search')
 def search_verses_route():
     # Get the search parameters from the query string
-  words = request.args.get('words').split(',')
+  words = request.args.get('words', None)
+  if words is None or words == '':
+    return jsonify({'error': 'Please provide at least one word to search'}), 400
+  words = words.split(',')
   mode = request.args.get('mode', 'all')
   scope = request.args.get('scope', 'all')
   max_verses = int(request.args.get('max_verses', MAX_VERSES))
