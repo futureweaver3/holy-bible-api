@@ -48,8 +48,8 @@ def get_books_info_route(book_abbreviation):
   return jsonify(book_record)
 
 
-@app.route('/verse/<book_abbreviation><chapter>:<verse>')
-@app.route('/verse/<book_abbreviation><chapter>:<verse>/<translation>')
+@app.route('/verse/<book_abbreviation>:<chapter>:<verse>')
+@app.route('/verse/<book_abbreviation>:<chapter>:<verse>:<translation>')
 def get_verse_route(book_abbreviation, chapter, verse, translation=DEFAULT_TRANSLATION):
   book_record = get_book_record(book_abbreviation)
   if book_record is None:
@@ -65,8 +65,8 @@ def get_verse_route(book_abbreviation, chapter, verse, translation=DEFAULT_TRANS
   return jsonify(requested_verse)
 
 
-@app.route('/verses/<book_abbreviation><chapter>:<verse_start>-<verse_end>')
-@app.route('/verses/<book_abbreviation><chapter>:<verse_start>-<verse_end>/<translation>')
+@app.route('/verses/<book_abbreviation>:<chapter>:<verse_start>-<verse_end>')
+@app.route('/verses/<book_abbreviation>:<chapter>:<verse_start>-<verse_end>:<translation>')
 def get_verses_route(book_abbreviation, chapter, verse_start, verse_end, translation=DEFAULT_TRANSLATION):
   book_record = get_book_record(book_abbreviation)
   if book_record is None:
@@ -82,9 +82,10 @@ def get_verses_route(book_abbreviation, chapter, verse_start, verse_end, transla
   return jsonify(requested_verse)
 
 
-@app.route('/chapter/<book_abbreviation><chapter>')
-@app.route('/chapter/<book_abbreviation><chapter>/<translation>')
+@app.route('/chapter/<book_abbreviation>:<chapter>')
+@app.route('/chapter/<book_abbreviation>:<chapter>:<translation>')
 def get_chapter_route(book_abbreviation, chapter, translation=DEFAULT_TRANSLATION):
+  print(book_abbreviation)
   book_record = get_book_record(book_abbreviation)
   if book_record is None:
     return jsonify({'error': 'Invalid book abbreviation'}), 400
@@ -99,8 +100,8 @@ def get_chapter_route(book_abbreviation, chapter, translation=DEFAULT_TRANSLATIO
   return jsonify(requested_verse)
 
 
-@app.route('/chapter_info/<book_abbreviation><chapter>')
-@app.route('/chapter_info/<book_abbreviation><chapter>/<translation>')
+@app.route('/chapter_info/<book_abbreviation>:<chapter>')
+@app.route('/chapter_info/<book_abbreviation>:<chapter>:<translation>')
 def get_chapter_info_route(book_abbreviation, chapter, translation=DEFAULT_TRANSLATION):
   book_record = get_book_record(book_abbreviation)
   if book_record is None:
