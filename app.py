@@ -42,6 +42,12 @@ def get_books_route():
   return jsonify(BIBLE_BOOKS)
 
 
+@app.route('/book_info/<book_abbreviation>')
+def get_books_info_route(book_abbreviation):
+  book_record = get_book_record(book_abbreviation)
+  return jsonify(book_record)
+
+
 @app.route('/verse/<book_abbreviation><chapter>:<verse>')
 @app.route('/verse/<book_abbreviation><chapter>:<verse>/<translation>')
 def get_verse_route(book_abbreviation, chapter, verse, translation=DEFAULT_TRANSLATION):

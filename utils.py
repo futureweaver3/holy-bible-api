@@ -39,24 +39,24 @@ def get_meta(db_path):
 
 def get_book_number(book_abbreviation):
   book_requested = book_abbreviation.lower()
-  for book_name, book in BIBLE_BOOKS.items():
-    if book['abbreviation'] == book_requested or book_name == book_requested:
+  for book in BIBLE_BOOKS:
+    if book['abbreviation'] == book_requested or book['name'] == book_requested:
       return book['number']
   return None
 
 
 def get_book_record(book_abbreviation):
   book_requested = book_abbreviation.lower()
-  for book_name, book in BIBLE_BOOKS.items():
-    if book['abbreviation'] == book_requested or book_name == book_requested:
-      book_record = {book_name: book}
-      return book_record
+  for book in BIBLE_BOOKS:
+    if book['abbreviation'] == book_requested or book['name'] == book_requested:
+      return book
   return None
 
 
 def fetch_verse_from_database(translation, book_record, chapter, verse):
   db_path = TRANSLATIONS_PATHS[translation]
-  book_key, book_value, book_number = book_record_unpack(book_record)
+  book_name, book_abbreviation, book_number = book_record_unpack(book_record)[
+      0:3]
   # Construct the SQL query
   sql_query = f'SELECT * FROM verses WHERE book = {book_number} AND chapter = {chapter} AND verse = {verse}'
   # Execute the SQL query asynchronously
@@ -67,15 +67,16 @@ def fetch_verse_from_database(translation, book_record, chapter, verse):
     record_dict = {field_names[i]: clean_unicode(
       row[i]) if field_names[i] == "text" else row[i] for i in range(len(field_names))}
     record_dict['translation'] = translation
-    record_dict['book_name'] = book_key
-    record_dict['book_abbreviation'] = book_value['abbreviation']
+    record_dict['book_name'] = book_name
+    record_dict['book_abbreviation'] = book_abbreviation
     records_list.append(record_dict)
   return records_list
 
 
 def fetch_verses_from_database(translation, book_record, chapter, verse_start, verse_end):
   db_path = TRANSLATIONS_PATHS[translation]
-  book_key, book_value, book_number = book_record_unpack(book_record)
+  book_name, book_abbreviation, book_number = book_record_unpack(book_record)[
+      0:3]
   # Construct the SQL query
   sql_query = f"SELECT * FROM verses WHERE book = {book_number} AND chapter = {chapter} AND verse >= {verse_start} AND verse <= CASE WHEN {verse_end} > (SELECT MAX(verse) FROM verses WHERE book = {book_number} AND chapter = {chapter}) THEN (SELECT MAX(verse) FROM verses WHERE book = {book_number} AND chapter = {chapter}) ELSE {verse_end} END"
   # Execute the SQL query asynchronously
@@ -86,15 +87,16 @@ def fetch_verses_from_database(translation, book_record, chapter, verse_start, v
     record_dict = {field_names[i]: clean_unicode(
       row[i]) if field_names[i] == "text" else row[i] for i in range(len(field_names))}
     record_dict['translation'] = translation
-    record_dict['book_name'] = book_key
-    record_dict['book_abbreviation'] = book_value['abbreviation']
+    record_dict['book_name'] = book_name
+    record_dict['book_abbreviation'] = book_abbreviation
     records_list.append(record_dict)
   return records_list
 
 
 def get_number_of_verses(translation, book_record, chapter):
   db_path = TRANSLATIONS_PATHS[translation]
-  book_key, book_value, book_number = book_record_unpack(book_record)
+  book_name, book_abbreviation, book_number = book_record_unpack(book_record)[
+      0:3]
   # Construct the SQL query
   sql_query = f"SELECT MAX(verse) FROM verses WHERE book = {book_number} AND chapter = {chapter}"
   # Execute the SQL query asynchronously
@@ -104,8 +106,8 @@ def get_number_of_verses(translation, book_record, chapter):
 
   results = {
     'translation': translation,
-    'book_name': book_key,
-    'book_abbreviation': book_value['abbreviation'],
+    'book_name': book_name,
+    'book_abbreviation': book_abbreviation,
     'chapter': chapter,
     'number_of_verses': number_of_verses
   }
@@ -114,14 +116,20 @@ def get_number_of_verses(translation, book_record, chapter):
 
 
 def book_record_unpack(book_record):
-  book_key = next(iter(book_record.keys()))
-  book_value = next(iter(book_record.values()))
-  book_number = book_value['number']
-  return book_key, book_value, book_number
+  book_name = book_record['name']
+  book_abbreviation = book_record['abbreviation']
+  book_number = book_record['number']
+  book_chapters = book_record['chapters']
+  book_testament = book_record['testament']
+  book_type = book_record['type']
+  book_author = book_record['author']
+  book_language = book_record['language']
+  book_description = book_record['description']
+  return book_name, book_abbreviation, book_number, book_chapters, book_testament, book_type, book_author, book_language, book_description
 
 
 def clean_unicode(value):
-    # Use unicodedata.normalize() to remove all Unicode characters
+  # Use unicodedata.normalize() to remove all Unicode characters
   cleaned_value = unicodedata.normalize(
     'NFKD', value).encode('ascii', 'ignore').decode('ascii')
   # Use .strip() to remove leading and trailing whitespace
