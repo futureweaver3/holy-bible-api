@@ -12,6 +12,8 @@ TRANSLATIONS_NAMES = {
     "kjv": "King James Version"
 }
 
+MAX_VERSES = 200  # Default max number of verses to return
+
 BIBLE_BOOKS = [
     {"name": "genesis", "abbreviation": "gen", "number": 1, "chapters": 50, "testament": "old", "type": "historical",
         "author": "Moses", "language": "Hebrew", "description": "First book of the Bible, traditionally attributed to Moses."},

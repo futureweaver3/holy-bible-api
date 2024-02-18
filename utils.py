@@ -1,6 +1,7 @@
 import asyncio
 import aiosqlite
 import unicodedata
+import random
 from constants import *
 
 
@@ -37,22 +38,6 @@ def get_meta(db_path):
   return records_list
 
 
-def get_book_number(book_abbreviation):
-  book_requested = book_abbreviation.lower()
-  for book in BIBLE_BOOKS:
-    if book['abbreviation'] == book_requested or book['name'] == book_requested:
-      return book['number']
-  return None
-
-
-def get_book_record(book_abbreviation):
-  book_requested = book_abbreviation.lower()
-  for book in BIBLE_BOOKS:
-    if book['abbreviation'] == book_requested or book['name'] == book_requested:
-      return book
-  return None
-
-
 def fetch_verse_from_database(translation, book_record, chapter, verse):
   db_path = TRANSLATIONS_PATHS[translation]
   book_name, book_abbreviation, book_number = book_record_unpack(book_record)[
@@ -70,6 +55,34 @@ def fetch_verse_from_database(translation, book_record, chapter, verse):
     record_dict['book_name'] = book_name
     record_dict['book_abbreviation'] = book_abbreviation
     records_list.append(record_dict)
+  return records_list
+
+
+def get_random_verse(translation):
+  db_path = TRANSLATIONS_PATHS[translation]
+  sql_query = f'SELECT * FROM verses WHERE id = {random.randint(1, 31102)}'
+  # Execute the SQL query asynchronously
+  field_names, rows = asyncio.run(execute_query(db_path, sql_query))
+  # Convert records to a list of dictionaries
+  records_list = []
+  for row in rows:
+    record_dict = {}
+    book_record = None
+    for i in range(len(field_names)):
+      if field_names[i] == "text":
+        record_dict[field_names[i]] = clean_unicode(row[i])
+      else:
+        record_dict[field_names[i]] = row[i]
+
+      if field_names[i] == "book":
+        book_record = get_book_record_by_number(row[i])
+
+    record_dict['translation'] = translation
+    if book_record is not None:
+      record_dict['book_name'] = book_record['name']
+      record_dict['book_abbreviation'] = book_record['abbreviation']
+    records_list.append(record_dict)
+
   return records_list
 
 
@@ -113,6 +126,83 @@ def get_number_of_verses(translation, book_record, chapter):
   }
 
   return results
+
+
+def search_verses(words, mode='all', scope='all', max_verses=MAX_VERSES, translation=DEFAULT_TRANSLATION):
+  db_path = TRANSLATIONS_PATHS[translation]
+  scope = scope.lower()
+  mode = mode.lower()
+  # Define the base SQL query
+  sql_query = "SELECT * FROM verses WHERE 1=1"
+
+  # Add conditions based on the search scope
+  if scope == 'old':
+    sql_query += " AND book < 40"
+  elif scope == 'new':
+    sql_query += " AND book > 39"
+  elif scope != 'all':
+    book = int(scope)
+    sql_query += f" AND book = {book}"
+
+  # Add conditions based on the search mode ('all' or 'any')
+  if mode == 'all':
+    # Search for verses that contain all the words
+    for word in words:
+      sql_query += f" AND text LIKE '%{word}%'"
+  else:
+    # Search for verses that contain any of the words
+    sql_query += " AND (" + \
+        " OR ".join([f"text LIKE '%{word}%'" for word in words]) + ")"
+
+  # Add a limit on the number of verses to return
+  sql_query += f" LIMIT {max_verses}"
+
+  # Execute the SQL query asynchronously
+  field_names, rows = asyncio.run(execute_query(db_path, sql_query))
+  # Convert records to a list of dictionaries
+  records_list = []
+  for row in rows:
+    record_dict = {}
+    book_record = None
+    for i in range(len(field_names)):
+      if field_names[i] == "text":
+        record_dict[field_names[i]] = clean_unicode(row[i])
+      else:
+        record_dict[field_names[i]] = row[i]
+
+      if field_names[i] == "book":
+        book_record = get_book_record_by_number(row[i])
+
+    record_dict['translation'] = translation
+    if book_record is not None:
+      record_dict['book_name'] = book_record['name']
+      record_dict['book_abbreviation'] = book_record['abbreviation']
+    records_list.append(record_dict)
+
+  return records_list
+
+
+def get_book_number(book_abbreviation):
+  book_requested = book_abbreviation.lower()
+  for book in BIBLE_BOOKS:
+    if book['abbreviation'] == book_requested or book['name'] == book_requested:
+      return book['number']
+  return None
+
+
+def get_book_record(book_abbreviation):
+  book_requested = book_abbreviation.lower()
+  for book in BIBLE_BOOKS:
+    if book['abbreviation'] == book_requested or book['name'] == book_requested:
+      return book
+  return None
+
+
+def get_book_record_by_number(book_number):
+  for book in BIBLE_BOOKS:
+    if book['number'] == book_number:
+      return book
+  return None
 
 
 def book_record_unpack(book_record):

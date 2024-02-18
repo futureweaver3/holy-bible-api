@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 from constants import *
 from utils import *
@@ -46,6 +46,19 @@ def get_books_route():
 def get_books_info_route(book_abbreviation):
   book_record = get_book_record(book_abbreviation)
   return jsonify(book_record)
+
+
+@app.route('/verse/random')
+@app.route('/verse/random:<translation>')
+def get_random_verse_route(translation=DEFAULT_TRANSLATION):
+
+  # Fetch a random verse from the SQLite database
+  requested_verse = get_random_verse(translation)
+
+  if len(requested_verse) < 1:
+    return jsonify({'error': 'Verse not found'}), 404
+
+  return jsonify(requested_verse)
 
 
 @app.route('/verse/<book_abbreviation>:<chapter>:<verse>')
@@ -113,6 +126,33 @@ def get_chapter_info_route(book_abbreviation, chapter, translation=DEFAULT_TRANS
     return jsonify(chapter_info)
   else:
     return jsonify({'error': 'Chapter not found'}), 404
+
+
+@app.route('/search')
+def search_verses_route():
+    # Get the search parameters from the query string
+  words = request.args.get('words').split(',')
+  mode = request.args.get('mode', 'all')
+  scope = request.args.get('scope', 'all')
+  max_verses = int(request.args.get('max_verses', MAX_VERSES))
+  translation = request.args.get('translation', DEFAULT_TRANSLATION)
+
+  if scope not in ['all', 'old', 'new']:
+    # Assume it is a book abbreviation
+    book_record = get_book_record(scope)
+    if book_record is None:
+      return jsonify({'error': 'Invalid scope'}), 400
+    scope = str(book_record['number'])
+
+  # Search for verses with the specified words
+  results = search_verses(
+    words, mode, scope, max_verses, translation)
+
+  if len(results) < 1:
+    return jsonify({'error': 'Verse not found'}), 404
+
+  # Return the results as JSON
+  return jsonify(results)
 
 
 if __name__ == '__main__':
