@@ -107,4 +107,4 @@ The Holy Bible API provides a convenient way to access the text and metadata of 
 
 ## Author
 
-Joseph Awad [futureweaver3@gmail.com](mailto:futureweaver3@gmail.com)
+[futureweaver3@gmail.com](mailto:futureweaver3@gmail.com)
