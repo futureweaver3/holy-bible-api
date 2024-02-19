@@ -1,5 +1,6 @@
 import os
 from flask import Flask, jsonify, request
+import markdown
 
 from constants import *
 from utils import *
@@ -10,6 +11,23 @@ app = Flask(__name__)
 def is_render():
   # Define the is_render function to check the environment variables
   return os.environ.get('RENDER') == 'true'
+
+
+@app.route('/')
+# Define the route for the API documentation
+def api_documentation():
+  # Specify the path to the README.md file
+  readme_path = './README.md'
+
+  # Read the content of the README.md file
+  with open(readme_path, 'r') as f:
+    readme_content = f.read()
+
+  # Convert the Markdown content to HTML
+  html_content = markdown.markdown(readme_content)
+
+  # Send the HTML content as the API documentation
+  return html_content
 
 
 @app.route('/info')
@@ -137,7 +155,7 @@ def search_verses_route():
   words = words.split(',')
   mode = request.args.get('mode', 'all')
   scope = request.args.get('scope', 'all')
-  max_verses = int(request.args.get('max_verses', MAX_VERSES))
+  max_verses = int(request.args.get('max', MAX_VERSES))
   translation = request.args.get('translation', DEFAULT_TRANSLATION)
 
   if scope not in ['all', 'old', 'new']:
