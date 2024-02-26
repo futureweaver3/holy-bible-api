@@ -8,9 +8,15 @@ TRANSLATIONS_PATHS = {
 }
 
 TRANSLATIONS_NAMES = {
-    "asv": "American Standard Version (1901)",
-    "kjv": "King James Version"
-}
+    "English": [
+        {
+            "abbreviation": "asv",
+            "description": "American Standard Version (1901)"
+        },
+        {
+            "abbreviation": "kjv",
+            "description": "King James Version"
+        }]}
 
 MAX_VERSES = 200  # Default max number of verses to return
 

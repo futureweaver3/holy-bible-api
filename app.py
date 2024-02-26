@@ -35,9 +35,12 @@ def get_info_route():
   info_data = {
       "name": "Holy Bible API",
       "version": "1.0.0",
-      "author": "Joseph Awad <futureweaver3@gmail.com>",
+      "author": "Future Weaver <futureweaver3@gmail.com>",
       "translations": TRANSLATIONS_NAMES,
-      "production": is_render()
+      "production": is_render(),
+      "status": "ready",
+      "when": "now",
+      "max_verses": MAX_VERSES
   }
   return jsonify(info_data)
 
@@ -60,8 +63,8 @@ def get_books_route():
   return jsonify(BIBLE_BOOKS)
 
 
-@app.route('/book_info/<book_abbreviation>')
-def get_books_info_route(book_abbreviation):
+@app.route('/book/<book_abbreviation>')
+def get_book_route(book_abbreviation):
   book_record = get_book_record(book_abbreviation)
   return jsonify(book_record)
 
@@ -73,7 +76,7 @@ def get_random_verse_route(translation=DEFAULT_TRANSLATION):
   # Fetch a random verse from the SQLite database
   requested_verse = get_random_verse(translation)
 
-  if len(requested_verse) < 1:
+  if len(requested_verse['chapters']['verses']) < 1:
     return jsonify({'error': 'Verse not found'}), 404
 
   return jsonify(requested_verse)
@@ -90,7 +93,7 @@ def get_verse_route(book_abbreviation, chapter, verse, translation=DEFAULT_TRANS
   requested_verse = fetch_verse_from_database(
     translation, book_record, chapter, verse)
 
-  if len(requested_verse) < 1:
+  if len(requested_verse['chapters']['verses']) < 1:
     return jsonify({'error': 'Verse not found'}), 404
 
   return jsonify(requested_verse)
@@ -104,13 +107,13 @@ def get_verses_route(book_abbreviation, chapter, verse_start, verse_end, transla
     return jsonify({'error': 'Invalid book abbreviation'}), 400
 
   # Fetch the verses from the SQLite database using the book number, chapter number, and verses range
-  requested_verse = fetch_verses_from_database(
+  requested_verses = fetch_verses_from_database(
     translation, book_record, chapter, verse_start, verse_end)
 
-  if len(requested_verse) < 1:
+  if len(requested_verses['chapters']['verses']) < 1:
     return jsonify({'error': 'Verse not found'}), 404
 
-  return jsonify(requested_verse)
+  return jsonify(requested_verses)
 
 
 @app.route('/chapter/<book_abbreviation>:<chapter>')
@@ -122,13 +125,13 @@ def get_chapter_route(book_abbreviation, chapter, translation=DEFAULT_TRANSLATIO
     return jsonify({'error': 'Invalid book abbreviation'}), 400
 
   # Fetch the verses from the SQLite database using the book number, chapter number
-  requested_verse = fetch_verses_from_database(
+  requested_verses = fetch_verses_from_database(
     translation, book_record, chapter, 1, 1000)
 
-  if len(requested_verse) < 1:
+  if len(requested_verses['chapters']['verses']) < 1:
     return jsonify({'error': 'Verse not found'}), 404
 
-  return jsonify(requested_verse)
+  return jsonify(requested_verses)
 
 
 @app.route('/chapter_info/<book_abbreviation>:<chapter>')
@@ -156,6 +159,8 @@ def search_verses_route():
   mode = request.args.get('mode', 'all')
   scope = request.args.get('scope', 'all')
   max_verses = int(request.args.get('max', MAX_VERSES))
+  if (max_verses > MAX_VERSES):
+    max_verses = MAX_VERSES
   translation = request.args.get('translation', DEFAULT_TRANSLATION)
 
   if scope not in ['all', 'old', 'new']:

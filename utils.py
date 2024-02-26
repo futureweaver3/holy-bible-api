@@ -47,15 +47,32 @@ def fetch_verse_from_database(translation, book_record, chapter, verse):
   # Execute the SQL query asynchronously
   field_names, rows = asyncio.run(execute_query(db_path, sql_query))
   # Convert records to a list of dictionaries
-  records_list = []
+  verses_list = []
   for row in rows:
-    record_dict = {field_names[i]: clean_unicode(
-      row[i]) if field_names[i] == "text" else row[i] for i in range(len(field_names))}
-    record_dict['translation'] = translation
-    record_dict['book_name'] = book_name
-    record_dict['book_abbreviation'] = book_abbreviation
-    records_list.append(record_dict)
-  return records_list
+    record_dict = {}
+    for i in range(len(field_names)):
+      if field_names[i] == "text":
+        record_dict["text"] = clean_unicode(row[i])
+      elif field_names[i] == "id":
+        record_dict["id"] = row[i]
+      elif field_names[i] == "verse":
+        record_dict["number"] = row[i]
+
+    verses_list.append(record_dict)
+  records = {
+    "book": {
+      "name": book_name,
+      "abbreviation": book_abbreviation,
+      "number": book_number,
+      "translation": translation
+    },
+    "chapters": {
+      "number": chapter,
+      "verses": verses_list
+    }
+  }
+
+  return records
 
 
 def get_random_verse(translation):
@@ -64,26 +81,39 @@ def get_random_verse(translation):
   # Execute the SQL query asynchronously
   field_names, rows = asyncio.run(execute_query(db_path, sql_query))
   # Convert records to a list of dictionaries
-  records_list = []
-  for row in rows:
+  verses_list = []
+  book_record = None
+  chapter = ""
+  for row in rows:  # one row
     record_dict = {}
-    book_record = None
     for i in range(len(field_names)):
       if field_names[i] == "text":
-        record_dict[field_names[i]] = clean_unicode(row[i])
-      else:
-        record_dict[field_names[i]] = row[i]
-
-      if field_names[i] == "book":
+        record_dict["text"] = clean_unicode(row[i])
+      elif field_names[i] == "id":
+        record_dict["id"] = row[i]
+      elif field_names[i] == "verse":
+        record_dict["number"] = row[i]
+      elif field_names[i] == "book":
         book_record = get_book_record_by_number(row[i])
+      elif field_names[i] == "chapter":
+        chapter = row[i]
 
-    record_dict['translation'] = translation
-    if book_record is not None:
-      record_dict['book_name'] = book_record['name']
-      record_dict['book_abbreviation'] = book_record['abbreviation']
-    records_list.append(record_dict)
+    verses_list.append(record_dict)
+  book_dict = {}
+  if book_record is not None:
+    book_dict['name'] = book_record['name']
+    book_dict['abbreviation'] = book_record['abbreviation']
+    book_dict['number'] = book_record['number']
+  book_dict['translation'] = translation
+  records = {
+      "book": book_dict,
+      "chapters": {
+          "number": chapter,
+          "verses": verses_list
+      }
+  }
 
-  return records_list
+  return records
 
 
 def fetch_verses_from_database(translation, book_record, chapter, verse_start, verse_end):
@@ -91,19 +121,36 @@ def fetch_verses_from_database(translation, book_record, chapter, verse_start, v
   book_name, book_abbreviation, book_number = book_record_unpack(book_record)[
       0:3]
   # Construct the SQL query
-  sql_query = f"SELECT * FROM verses WHERE book = {book_number} AND chapter = {chapter} AND verse >= {verse_start} AND verse <= CASE WHEN {verse_end} > (SELECT MAX(verse) FROM verses WHERE book = {book_number} AND chapter = {chapter}) THEN (SELECT MAX(verse) FROM verses WHERE book = {book_number} AND chapter = {chapter}) ELSE {verse_end} END"
+  sql_query = f"SELECT * FROM verses WHERE book = {book_number} AND chapter = {chapter} AND verse >= {verse_start} AND verse <= CASE WHEN {verse_end} > (SELECT MAX(verse) FROM verses WHERE book = {book_number} AND chapter = {chapter}) THEN (SELECT MAX(verse) FROM verses WHERE book = {book_number} AND chapter = {chapter}) ELSE {verse_end} END ORDER BY id ASC"
   # Execute the SQL query asynchronously
   field_names, rows = asyncio.run(execute_query(db_path, sql_query))
   # Convert records to a list of dictionaries
-  records_list = []
+  verses_list = []
   for row in rows:
-    record_dict = {field_names[i]: clean_unicode(
-      row[i]) if field_names[i] == "text" else row[i] for i in range(len(field_names))}
-    record_dict['translation'] = translation
-    record_dict['book_name'] = book_name
-    record_dict['book_abbreviation'] = book_abbreviation
-    records_list.append(record_dict)
-  return records_list
+    record_dict = {}
+    for i in range(len(field_names)):
+      if field_names[i] == "text":
+        record_dict["text"] = clean_unicode(row[i])
+      elif field_names[i] == "id":
+        record_dict["id"] = row[i]
+      elif field_names[i] == "verse":
+        record_dict["number"] = row[i]
+
+    verses_list.append(record_dict)
+  records = {
+    "book": {
+      "name": book_name,
+      "abbreviation": book_abbreviation,
+      "number": book_number,
+      "translation": translation
+    },
+    "chapters": {
+      "number": chapter,
+      "verses": verses_list
+    }
+  }
+
+  return records
 
 
 def get_number_of_verses(translation, book_record, chapter):
@@ -117,15 +164,20 @@ def get_number_of_verses(translation, book_record, chapter):
   if number_of_verses is None:
     return None
 
-  results = {
-    'translation': translation,
-    'book_name': book_name,
-    'book_abbreviation': book_abbreviation,
-    'chapter': chapter,
-    'number_of_verses': number_of_verses
+  records = {
+    "book": {
+      "name": book_name,
+      "abbreviation": book_abbreviation,
+      "number": book_number,
+      "translation": translation
+    },
+    "chapters": {
+      "number": chapter,
+      "verses": number_of_verses
+    }
   }
 
-  return results
+  return records
 
 
 def search_verses(words, mode='all', scope='all', max_verses=MAX_VERSES, translation=DEFAULT_TRANSLATION):
@@ -154,30 +206,73 @@ def search_verses(words, mode='all', scope='all', max_verses=MAX_VERSES, transla
     sql_query += " AND (" + \
         " OR ".join([f"text LIKE '%{word}%'" for word in words]) + ")"
 
+  # Order the verses by book and chapter
+  sql_query += f" ORDER BY id ASC"
+
   # Add a limit on the number of verses to return
   sql_query += f" LIMIT {max_verses}"
 
   # Execute the SQL query asynchronously
   field_names, rows = asyncio.run(execute_query(db_path, sql_query))
+
   # Convert records to a list of dictionaries
   records_list = []
+  current_book = None
+  current_chapter = None
+  current_verses = []
+
   for row in rows:
+    verses_list = []
+    book_record = None
+    chapter = 0
     record_dict = {}
     book_record = None
     for i in range(len(field_names)):
       if field_names[i] == "text":
         record_dict[field_names[i]] = clean_unicode(row[i])
-      else:
-        record_dict[field_names[i]] = row[i]
-
-      if field_names[i] == "book":
+      elif field_names[i] == "id":
+        record_dict["id"] = row[i]
+      elif field_names[i] == "verse":
+        record_dict["number"] = row[i]
+      elif field_names[i] == "book":
         book_record = get_book_record_by_number(row[i])
+      elif field_names[i] == "chapter":
+        chapter = row[i]
 
-    record_dict['translation'] = translation
-    if book_record is not None:
-      record_dict['book_name'] = book_record['name']
-      record_dict['book_abbreviation'] = book_record['abbreviation']
-    records_list.append(record_dict)
+    if book_record is None:
+      continue
+
+    # Check if this is a new book
+    if current_book is None or current_book['number'] != book_record['number']:
+      # Create a new book dictionary
+      current_book = {
+          'name': book_record['name'],
+          'abbreviation': book_record['abbreviation'],
+          'number': book_record['number'],
+          'translation': translation,
+      }
+      current_chapter = None  # Reset the current chapter
+      current_verses = []  # Reset the current verses
+
+      # Append the book to the records_list
+      records_list.append({
+          'book': current_book,
+          'chapters': []  # This will hold the chapters of this book
+      })
+
+    # Check if this is a new chapter
+    if current_chapter is None or current_chapter['number'] != chapter:
+      # Create a new chapter dictionary
+      current_chapter = {
+          'number': chapter,
+          'verses': []  # This will hold the verses of this chapter
+      }
+
+      # Append the chapter to the chapters list of the current book
+      records_list[-1]['chapters'].append(current_chapter)
+
+    # Append the verse to the verses list of the current chapter
+    current_chapter['verses'].append(record_dict)
 
   return records_list
 

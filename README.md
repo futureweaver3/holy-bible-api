@@ -47,7 +47,7 @@ These routes return information about a specific Bible translation. The <transla
 This route returns a list of books in the Bible.<br /><br />
 
 ```
-/book_info/<book_abbreviation>
+/book/<book_abbreviation>
 ```
 
 This route returns information about a specific book in the Bible, including its name, abbreviation, number, number of chapter, old/new testament, type, author, language, and description.<br /><br />
@@ -93,7 +93,7 @@ These routes return information about a specific chapter from the Bible, includi
 This route allows users to perform a search on the text of the Bible. The search query can be provided as a query parameter. For example, to search for the word "love", you would use the following URL: /search?words=love. You need a least one word to get a successful response. There are other parameters but they have a default values. Here is an example:
 
 ```
-/search?words=love,peace&mode=any&scope=new&max_verses=10&translation=asv
+/search?words=love,peace&mode=any&scope=new&max=10&translation=asv
 ```
 
 - **mode** can be **all** (Default value: find the verses that have all the words) or **any** (find the verses that have any of the words).
@@ -107,4 +107,4 @@ The Holy Bible API provides a convenient way to access the text and metadata of 
 
 ## Author
 
-[futureweaver3@gmail.com](mailto:futureweaver3@gmail.com)
+Future Weaver [futureweaver3@gmail.com](mailto:futureweaver3@gmail.com)
