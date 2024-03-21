@@ -18,6 +18,10 @@ To get started using the Holy Bible API, you'll need to install the required dep
 
 > pip install -r requirements.txt
 
+- Run the API:
+
+> python app.py
+
 ## Routes
 
 The Holy Bible API provides several routes for accessing different types of information. Here's a list of the available routes:<br /><br />
@@ -100,6 +104,10 @@ This route allows users to perform a search on the text of the Bible. The search
 - **scope** can be **all** (Default value: all the bible), **old** (old testament), **new** (new testament), or **book name or abbreviation** (limit the search to this book only).
 - **max** is the maximum number of verses requested. The default value is 200.
 - **translation** is bible translation wanted for the search. The default value is kjv.<br /><br />
+
+## Testing
+
+You may evaluate this API by accessing the following server: [holy-bible-api](https://holy-bible-api.onrender.com/). However, please refrain from integrating it into your applications, as it operates on a free server with usage limitations. Its primary purpose is to facilitate other developers in testing the API before incorporating it into their projects. Do note that the initial API response may take approximately 50 seconds to wake up the server. Subsequent requests should be considerably faster. You're welcome to clone and deploy it on your own server for the greater purpose of serving God.
 
 ## Conclusion
 
