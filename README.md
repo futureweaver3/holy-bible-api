@@ -8,7 +8,7 @@ To get started using the Holy Bible API, you'll need to install the required dep
 
 - Clone the Holy Bible API repository from GitHub:
 
-> git clone https://github.com/futureweaver3/holy-bible-api
+> git clone https://github.com/futureweaver3/holy-bible-api.git
 
 - Navigate to the project directory:
 
